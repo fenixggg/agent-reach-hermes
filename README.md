@@ -22,7 +22,7 @@
 | **微信公众号** | `wechat_search.py` | 搜狗微信直搜、落地真实 URL 解析 | 免登录 |
 | **V2EX** | 官方公开 API | 节点主题、全站热门 | 免登录 |
 | **豆瓣电影** | Rexxar API | 电影详情、影评、短评深度抓取 | 免登录 |
-| **音视频转录** | `transcribe.py` (Whisper) | B站/YouTube/小红书音视频提取与 Groq 快速转录 | 需 Groq API Key |
+| **多平台音视频转录** | `transcribe.py` (Whisper / yt-dlp) | 支持 YouTube、B站、小红书视频、小宇宙播客转文字稿 | 需 Groq API Key |
 | **GitHub / 开发** | `gh` CLI | 代码库检索、Issue/PR 联动 | 需 GitHub Auth |
 | **网页全文阅读** | Jina / Firecrawl / better-webfetch | 通用正文提取与降噪 | 视选型而定 |
 

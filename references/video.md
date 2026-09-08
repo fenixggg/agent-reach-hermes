@@ -1,8 +1,50 @@
-# 视频/播客
+# 多平台视频转录与字幕 (Video & Audio Transcription)
 
-YouTube、B站、小宇宙播客的字幕和转录。
+> **支持平台矩阵**：
+> 1. **YouTube**：免登录原生/自动多语言字幕下载 (`yt-dlp`)、视频信息解析、无字幕音轨提取转写
+> 2. **B站 (Bilibili)**：`bilibili-cli` 原生直连提取官方字幕/AI总结，或兜底下载音频转写
+> 3. **小红书 (XiaoHongShu)**：短视频与图文笔记内嵌 SRT 字幕自动提取、音轨拉取转录
+> 4. **小宇宙播客 (Xiaoyuzhou)**：单集播客音频抓取与超长语音切片转文字稿
+> 5. **通用音视频**：本地文件或任意支持格式音频，通过云端 Groq Whisper Large-v3 秒级转文字
 
-## YouTube (yt-dlp)
+## 安装与环境依赖
+
+```bash
+# 1. 媒体下载器 yt-dlp (各平台视频拉取核心)
+# Windows 推荐 winget 或 pip:
+pip install yt-dlp
+
+# 2. 系统核心依赖 ffmpeg (音视频格式转换与切片必备)
+# 必须配置在系统 PATH 环境变量中
+
+# 3. 云端 Whisper API (高速转文字)
+# 在 profile .env 中配置 GROQ_API_KEY=gsk_xxxx (免费层已足够高频使用)
+```
+
+## 1. 统一转录入口脚本 (transcribe.py)
+
+无需关心底层各平台的取流差异，直接传 URL 或 ID 即可：
+
+```bash
+# 语法: python scripts/transcribe.py "<URL或ID>" [可选指定输出目录]
+
+# YouTube 视频
+python scripts/transcribe.py "https://www.youtube.com/watch?v=VIDEO_ID"
+
+# B站视频 (支持 URL 或 BV 号)
+python scripts/transcribe.py "https://www.bilibili.com/video/BV19xwKeTEye"
+python scripts/transcribe.py "BV19xwKeTEye"
+
+# 小红书视频笔记 (支持 URL 或 24位 hex note_id)
+python scripts/transcribe.py "https://www.xiaohongshu.com/explore/699da865000000000e03ca2b"
+
+# 小宇宙播客
+python scripts/transcribe.py "https://www.xiaoyuzhoufm.com/episode/EPISODE_ID"
+```
+
+---
+
+## 2. YouTube (yt-dlp 详细命令)
 
 ### 获取视频元数据
 

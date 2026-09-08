@@ -11,9 +11,8 @@ description: >
   14 platforms. Zero config for 7 channels.
 
   【路由方式】SKILL.md 包含路由表和常用命令，复杂场景需按需阅读对应分类的 references/*.md。
-  分类：search / social (微信/小红书/知乎/B站/雪球/豆瓣/V2EX/推特/Reddit/YouTube/LinkedIn/GitHub) / web(网页/文章/RSS) / video(播客/音频转录)。
+  分类：social (微信/小红书/知乎/B站/雪球/豆瓣/V2EX/推特/Reddit/LinkedIn/GitHub) / video (视频转录与字幕: YouTube/B站/小红书/小宇宙播客) / web (网页/文章/RSS)。
 triggers:
-  - search: 搜/查/找/search/搜索/查一下/帮我搜
   - social:
     - 微信: 微信/公众号/微信文章/搜微信/查公众号/wechat
     - 小红书: xiaohongshu/xhs/小红书/红书
@@ -23,13 +22,13 @@ triggers:
     - 豆瓣: douban/豆瓣/影评/豆瓣评分/豆瓣短评/电影评分
     - V2EX: v2ex
     - Twitter: twitter/推特/x.com/推文
-    - YouTube: youtube/油管/yt/youtube字幕/youtube视频
     - Reddit: reddit
     - LinkedIn: linkedin/领英/招聘/职位/求职/找工作
     - GitHub: github/代码/仓库/gh/issue/pr/分支/commit
-  - web: 网页/链接/文章/rss/读一下/打开这个
-  - video: 播客/字幕/小宇宙/转录/文字稿/转文字/音频转写
-  - transcribe: 转录/转文字/文字稿/字幕/语音转文字/音频转文字/视频转文字
+  - video:
+    - 视频转录: 视频/视频转录/字幕/音频转写/转文字/文字稿/音视频提取
+    - 支持平台: YouTube/油管/yt/B站视频/bilibili字幕/小红书视频/小宇宙/播客
+  - web: 网页/链接/文章/rss/读一下/打开这个/web阅读
 metadata:
   source: Agent-Reach (adapted for Hermes Agent)
   homepage: https://github.com/Panniantong/Agent-Reach
@@ -58,18 +57,16 @@ metadata:
 | 平台 / 意图 | 标识 | 核心功能 | 详细文档 |
 |:---|:---:|:---|:---|
 | **Twitter / X** | twitter | 时间线、推文详情、长文、用户资料 | [references/twitter.md](references/twitter.md) |
-| **YouTube** | video | 视频信息、原生外挂字幕提取 (yt-dlp)、音频转文字稿 | [references/video.md](references/video.md) |
 | **Reddit** | reddit | 社区帖子阅读、多层评论流、Subreddit 热门 | [references/reddit.md](references/reddit.md) |
 | **LinkedIn (领英)** | career | 职场社交、公开档案与职位检索 | [references/career.md](references/career.md) |
 | **GitHub** | github | 仓库检索、代码搜索、Issue / PR 处理 | [references/dev.md](references/dev.md) |
 
-### 3. 通用搜索、网页读取与音频播客
+### 3. 多平台视频转录与网页阅读
 
-| 类别 / 意图 | 标识 | 核心功能 | 详细文档 |
+| 类别 / 意图 | 标识 | 核心功能与支持网站 | 详细文档 |
 |:---|:---:|:---|:---|
-| **网页搜索 / 代码搜索** | search | Tavily 结构化搜索、Exa AI 深度检索 | [references/search.md](references/search.md) |
-| **网页 / 文章 / RSS** | web | Firecrawl 浏览器渲染、Jina Reader 降噪 | [references/web.md](references/web.md) |
-| **小宇宙播客 / 音频转录** | transcribe | 小宇宙播客抓取、Groq Whisper Large-v3 极速语音转写 | [references/video.md](references/video.md) |
+| **多平台视频转录与字幕** | video | **支持平台**：**YouTube**、**B站 (Bilibili)**、**小红书视频**、**小宇宙播客**<br>原生字幕提取 (yt-dlp/bili)、音频流拉取与 Groq Whisper Large-v3 极速转文字稿 | [references/video.md](references/video.md) |
+| **网页阅读 / 正文提取** | web | Firecrawl 浏览器渲染、Jina Reader 降噪、RSS 聚合阅读 | [references/web.md](references/web.md) |
 
 > 旧 `social.md` 已拆分为上述各平台独立文档，按行直达，不再需要先读 social 总览。
 
@@ -153,7 +150,6 @@ pip list 2>nul | findstr "xiaohongshu-cli twitter-cli bilibili-cli rdt-cli"
 
 根据用户需求，阅读对应的详细文档：
 
-- [搜索工具](references/search.md) — Exa AI 搜索
 - [知乎](references/zhihu.md) — 官方 Zhihu CLI：搜索/热榜/直答/额度
 - [雪球](references/xueqiu.md) — snowball-cli：帖子/讨论/KOL观点（行情兜底走东财API）
 - [小红书](references/xiaohongshu.md) — xhs-cli
@@ -166,6 +162,6 @@ pip list 2>nul | findstr "xiaohongshu-cli twitter-cli bilibili-cli rdt-cli"
 - [GitHub / 代码工具](references/dev.md) — GitHub CLI (gh)
 - [网页阅读](references/web.md) — Jina Reader, RSS, 各工具选型对比
 - [网页工具速查](references/web-tools.md) — 搜索 vs 读取，一页速查
-- [视频播客](references/video.md) — YouTube, B站, 小宇宙
+- [多平台视频转录与字幕](references/video.md) — YouTube, B站, 小红书视频, 小宇宙播客
 - [转录格式规范](scripts/transcribe_format.md) — 转录文字稿格式化规则
 - [X/Twitter 获取路径对比](references/x-comparison.md) — twitter-cli (免费) vs x_search (付费稳定+AI总结)
