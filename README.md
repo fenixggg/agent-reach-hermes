@@ -26,6 +26,27 @@
 | **GitHub / 开发** | `gh` CLI | 代码库检索、Issue/PR 联动 | 需 GitHub Auth |
 | **网页全文阅读** | Jina / Firecrawl / better-webfetch | 通用正文提取与降噪 | 视选型而定 |
 
+## 💡 与原版（Panniantong/Agent-Reach）的区别与改进
+
+原版 `Agent-Reach` 主要是作为一个独立的全局 Python CLI 工具包来设计和分发的。而在实际接入 **Hermes Agent** 的高频对话与自动化调度场景中，直接运行原始仓库会面临上下文开销大、缺少原生平台规范、反爬机制适配等痛点。本项目基于此做了以下核心改进：
+
+1. **架构改造：从通用 CLI 转换为 Hermes 原生 Skill 规范**
+   - 彻底解耦庞大的单一代码库，改造为标准 Hermes Skill 结构（`SKILL.md` + 模块化 `references/` + 辅助 `scripts/`）。
+   - **两层路由体系（节省 Context）**：Agent 在触发时仅需加载第一层轻量级索引，只有需要深入特定平台交互时才按需读取单项平台的 Markdown 文档，极大降低 Token 消耗。
+
+2. **新增关键平台与官方 CLI 适配**
+   - **知乎 (Zhihu)**：官方网页端具有严苛的反爬风控，纯网页爬虫极易失败。本项目接入了官方知乎 CLI（数据开放平台原生接口），支持高质量的知乎搜索、全网搜索、热榜与直答。
+   - **雪球 (Xueqiu)**：新增雪球投资者社区适配（`snowball-cli`），支持个股 KOL 讨论流、全站热帖以及实时行情的备用兜底。
+   - **豆瓣电影 (Douban)**：接入免登录的 Rexxar 移动端轻量接口，解决了桌面版页面对免 Cookie 请求的防爬拦截问题。
+
+3. **国内生态与深度提取优化**
+   - **微信文章解密与提取链**：内置专属 `wechat_search.py`，实现搜狗微信搜索结果与微信官方直链（`mp.weixin.qq.com`）的安全逆向解析；配合提取工具链实现 0.3s 级极速免登录正文抓取，避免无效消耗第三方付费渲染 API。
+   - **小红书 xsec 机制打通**：完整覆盖小红书强制的 `xsec_token` 读取链路与风控避让策略。
+   - **音视频转录链路增强**：`transcribe.py` 集成 Groq Whisper Large v3 云端极速转录能力，并针对小红书、B站、YouTube 提供结构化转文字与摘要规范输出。
+
+4. **实战踩坑与运维指南（Operational Playbooks）**
+   - 原版文档多停留在安装步骤，本项目在 `references/` 中记录了各平台真实对抗风控的落地经验（如 Chromium App-Bound Encryption 对 cookie 导出的影响、各平台的 Token 持久化与灾备恢复方案、CLI 在 Windows/PowerShell 下的执行陷阱等）。
+
 ---
 
 ## 🚀 安装与使用
