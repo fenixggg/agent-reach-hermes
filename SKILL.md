@@ -11,7 +11,7 @@ description: >
   14 platforms. Zero config for 7 channels.
 
   【路由方式】SKILL.md 包含路由表和常用命令，复杂场景需按需阅读对应分类的 references/*.md。
-  分类：search / social (微信/小红书/知乎/B站/雪球/豆瓣/V2EX/推特/Reddit/GitHub) / career(LinkedIn) / web(网页/文章/RSS) / video(YouTube/B站/播客)。
+  分类：search / social (微信/小红书/知乎/B站/雪球/豆瓣/V2EX/推特/Reddit/YouTube/LinkedIn/GitHub) / web(网页/文章/RSS) / video(播客/音频转录)。
 triggers:
   - search: 搜/查/找/search/搜索/查一下/帮我搜
   - social:
@@ -23,11 +23,12 @@ triggers:
     - 豆瓣: douban/豆瓣/影评/豆瓣评分/豆瓣短评/电影评分
     - V2EX: v2ex
     - Twitter: twitter/推特/x.com/推文
+    - YouTube: youtube/油管/yt/youtube字幕/youtube视频
     - Reddit: reddit
+    - LinkedIn: linkedin/领英/招聘/职位/求职/找工作
     - GitHub: github/代码/仓库/gh/issue/pr/分支/commit
-  - career: 招聘/职位/求职/linkedin/领英/找工作
   - web: 网页/链接/文章/rss/读一下/打开这个
-  - video: youtube/视频/播客/字幕/小宇宙/转录/yt/文字稿/转文字/音频转写
+  - video: 播客/字幕/小宇宙/转录/文字稿/转文字/音频转写
   - transcribe: 转录/转文字/文字稿/字幕/语音转文字/音频转文字/视频转文字
 metadata:
   source: Agent-Reach (adapted for Hermes Agent)
@@ -57,17 +58,18 @@ metadata:
 | 平台 / 意图 | 标识 | 核心功能 | 详细文档 |
 |:---|:---:|:---|:---|
 | **Twitter / X** | twitter | 时间线、推文详情、长文、用户资料 | [references/twitter.md](references/twitter.md) |
-| **Reddit** | reddit | 帖子阅读、多层评论流、Subreddit 热门 | [references/reddit.md](references/reddit.md) |
+| **YouTube** | video | 视频信息、原生外挂字幕提取 (yt-dlp)、音频转文字稿 | [references/video.md](references/video.md) |
+| **Reddit** | reddit | 社区帖子阅读、多层评论流、Subreddit 热门 | [references/reddit.md](references/reddit.md) |
+| **LinkedIn (领英)** | career | 职场社交、公开档案与职位检索 | [references/career.md](references/career.md) |
 | **GitHub** | github | 仓库检索、代码搜索、Issue / PR 处理 | [references/dev.md](references/dev.md) |
 
-### 3. 通用搜索、网页读取与多媒体
+### 3. 通用搜索、网页读取与音频播客
 
 | 类别 / 意图 | 标识 | 核心功能 | 详细文档 |
 |:---|:---:|:---|:---|
 | **网页搜索 / 代码搜索** | search | Tavily 结构化搜索、Exa AI 深度检索 | [references/search.md](references/search.md) |
 | **网页 / 文章 / RSS** | web | Firecrawl 浏览器渲染、Jina Reader 降噪 | [references/web.md](references/web.md) |
-| **YouTube / 播客字幕** | video | yt-dlp 字幕提取、小宇宙播客、音视频转录 | [references/video.md](references/video.md) |
-| **职场招聘 / LinkedIn** | career | 领英职位搜索与人才检索 | [references/career.md](references/career.md) |
+| **小宇宙播客 / 音频转录** | transcribe | 小宇宙播客抓取、Groq Whisper Large-v3 极速语音转写 | [references/video.md](references/video.md) |
 
 > 旧 `social.md` 已拆分为上述各平台独立文档，按行直达，不再需要先读 social 总览。
 
