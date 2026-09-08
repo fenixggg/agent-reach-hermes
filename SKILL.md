@@ -30,8 +30,9 @@ triggers:
     - 支持平台: YouTube/油管/yt/B站视频/bilibili字幕/小红书视频/小宇宙/播客
   - web: 网页/链接/文章/rss/读一下/打开这个/web阅读
 metadata:
-  source: Agent-Reach (adapted for Hermes Agent)
-  homepage: https://github.com/Panniantong/Agent-Reach
+  source: Agent-Reach (adapted for Hermes Agent by fenixggg)
+  homepage: https://github.com/fenixggg/agent-reach-hermes
+  upstream: https://github.com/Panniantong/Agent-Reach
 ---
 
 # Agent Reach — 路由器
