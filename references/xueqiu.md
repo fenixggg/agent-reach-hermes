@@ -1,11 +1,15 @@
 # 雪球 / Xueqiu (snowball-cli)
 
-> 雪球**帖子/讨论内容**的专用工具（行情走东财公开API更快，见下方兜底）。
-> v0.3.1，npm 全局安装 2026-09-08。专为 AI Agent 设计，JSON 输出。
+## 安装与环境配置
 
-## 登录态
+```bash
+# 全局安装 snowball-cli
+npm install -g @snowball-tools/snowball-cli
+```
 
-# 社交类命令需要登录态（已配置，凭证位置见下方表格）
+> **定位**：雪球**帖子/讨论内容/KOL动态**专用工具（基础股票实时行情走公开金融API更轻量，详见下方兜底说明）。专为 AI Agent 设计，原生结构化输出。
+
+## 登录态与凭证
 
 ```bash
 snowball login          # 终端二维码，用雪球App扫码

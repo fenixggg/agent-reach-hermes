@@ -1,6 +1,15 @@
 # Twitter/X (twitter-cli)
 
-## 稳定命令
+## 安装与环境要求
+
+```bash
+# 安装 twitter-cli（推荐 v0.8.5+）
+pipx install twitter-cli
+```
+
+> **认证要求**：twitter-cli 依赖用户环境变量或当前 profile `.env` 中的 `TWITTER_AUTH_TOKEN` 与 `TWITTER_CT0`。配置方式详见下方凭证说明。
+
+## 常用稳定命令
 
 ```bash
 # 首页时间线（最稳定）

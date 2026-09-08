@@ -1,15 +1,16 @@
 # B站 / Bilibili (bilibili-cli)
 
-使用 `bili` 命令（属于 `public-clis/bilibili-cli`，和 xhs-cli / twitter-cli 同一作者）。
-
-## 安装
+## 安装与环境配置
 
 ```bash
-uv tool install bilibili-cli
-# 或：pipx install bilibili-cli
+# 推荐使用 pipx 或 uv 安装
+pipx install bilibili-cli
+# 或: uv tool install bilibili-cli
 ```
 
-## 视频
+> **说明**：属于 `public-clis/bilibili-cli` 系列。免登录即可支持视频详情、字幕提取、热门排行榜、搜索等；用户收藏夹/动态互动等功能需扫码或配置 Cookie。
+
+## 视频命令速查
 
 ```bash
 # 视频详情（含播放量、点赞、投币、收藏等统计）

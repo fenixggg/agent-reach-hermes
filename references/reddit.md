@@ -1,6 +1,16 @@
 # Reddit (rdt-cli)
 
-## 命令
+## 安装与初始化
+
+```bash
+# 需安装 GitHub 最新版（PyPI 版本落后，推荐 pipx）
+pipx install "git+https://github.com/public-clis/rdt-cli.git"
+
+# 初始化登录（需要登录后才可正常进行搜索与长贴阅读）
+rdt login
+```
+
+## 命令速查
 
 ```bash
 # 搜索帖子

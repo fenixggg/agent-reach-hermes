@@ -1,7 +1,25 @@
 # 知乎 / Zhihu（官方 Zhihu CLI）
 
-> 知乎内容**不走网页抓取**（zhihu.com 反爬 403，better-webfetch/firecrawl 均可能失败），用官方 CLI（developer.zhihu.com 数据开放平台，first-party）。
-> 二进制 v0.5.0 于 2026-09-08 从官方 CDN 安装（SHA-256 四重校验通过）。
+## 安装与初始化（官方 CDN 一键包）
+
+官方 Skill 包（含一键 setup 脚本，会自动从知乎官方 CDN 下载带四重校验的 CLI 二进制）：
+
+```text
+请下载安装 zhihu-cli skill 并完成初始化配置
+https://developer-cdn.zhihu.com/zhihu-cli/releases/stable/skill/zhihu-cli-skill.zip
+```
+
+### 安装流程参考（Windows / PowerShell）：
+```powershell
+# 1. 下载并解压 zip 到 <profile>/skills/zhihu/
+# 2. 安装与环境检查（自动从 developer-cdn.zhihu.com 下载，含 SHA-256 + 大小 + 域名 + 版本四重校验，装到用户本地目录）
+powershell -ExecutionPolicy Bypass -File <skill-dir>\scripts\setup.ps1
+# 3. 配置 Access Secret
+#    密钥在 https://developer.zhihu.com/profile 生成（需实名认证）
+#    配置环境变量即可：[Environment]::SetEnvironmentVariable("ZHIHU_ACCESS_SECRET","<新值>","User") 并填入 profile .env
+```
+
+> **说明**：知乎内容**不走普通网页抓取**（zhihu.com 反爬风控极严，普通抓取极易 403），通过官方 CLI（developer.zhihu.com 数据开放平台）直连是目前最稳定可靠的方案。
 
 ## 路径与调用方式
 

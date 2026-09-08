@@ -1,5 +1,15 @@
 # 小红书 / XiaoHongShu (xhs-cli)
 
+## 安装与初始化
+
+```bash
+# 推荐使用 pipx 进行独立环境安装
+pipx install xiaohongshu-cli
+
+# 初始化登录（自动从支持的浏览器如 Chrome/Edge 提取本地 Cookie）
+xhs login
+```
+
 ## 稳定可用的命令
 
 ```bash
