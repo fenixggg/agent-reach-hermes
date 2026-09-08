@@ -51,47 +51,24 @@
 
 ## 🚀 一键安装与使用
 
-> **💡 最省心方式**：直接把下面这段安装指令**整段复制发给你的 Hermes Agent**，让 Agent 自行完成目录定位、Git 克隆及 Skill 加载：
-
-### 方式 A：发给 Agent 自动安装（推荐 ⭐️）
-
-直接在 Hermes 对话窗口中发送：
+无需手动找目录，也无需提前安装 Git 工具。直接把下面这句自然语言指令**复制发送给你的 Hermes Agent**：
 
 ```text
-请帮我把这个 Skill 安装到当前 profile 的 skills 目录下，并重新加载 skills：
-git clone https://github.com/fenixggg/agent-reach-hermes.git <skills_dir>/agent-reach
-然后执行 /reload-skills 检查是否安装成功。
+请帮我把这个 Skill 仓库安装到当前 profile 的 skills 目录下：
+https://github.com/fenixggg/agent-reach-hermes
+安装为 agent-reach 目录（优先用 git clone，若没有 git 则通过 GitHub API/ZIP 下载解压），完成后执行 /reload-skills 并确认是否就绪。
 ```
 
-*(或者在对话中直接发送：)*
-```text
-帮我安装 GitHub 仓库 fenixggg/agent-reach-hermes 到当前 profile 的 skills/agent-reach 目录，并加载它。
-```
+> **说明**：Hermes Agent 具备完备的代码执行与网络能力。即使你的环境里没有安装 `git` 命令行工具，Agent 也会自动通过 Python 或系统内置工具下载解压并挂载生效。
 
 ---
 
-### 方式 B：终端手动安装（CLI）
+### 依赖 CLI 工具（完全解耦，按需安装）
 
-如果你希望在本地终端手动操作：
-
-```bash
-# 1. 查找或进入你当前使用的 profile skills 目录（默认 profile 通常在 ~/.hermes/skills/）
-cd ~/.hermes/skills/
-
-# 2. 克隆仓库至 agent-reach 目录
-git clone https://github.com/fenixggg/agent-reach-hermes.git agent-reach
-
-# 3. 在 Hermes 对话窗口中发送 /reload-skills 即可立即生效
-```
-
----
-
-### 依赖 CLI 工具按需安装
-
-该 Skill 采用轻量化设计，各大平台 CLI **完全解耦、按需安装**。你只需要为你打算使用的平台安装对应 CLI 即可：
+该 Skill 采用模块化设计，平台 CLI **按需安装，互不影响**。即使你不安装任何 CLI，基础功能（如网页/微信文章直搜等）依然可用。当你需要特定平台时，甚至可以直接让 Agent 帮你在终端安装：
 
 ```bash
-# 常用平台 Python CLI (推荐 pipx 独立环境安装)
+# 常用平台 Python CLI (可手动安装或让 Agent 帮装)
 pipx install xiaohongshu-cli                          # 小红书
 pipx install bilibili-cli                             # B站
 pipx install twitter-cli                              # Twitter / X
@@ -101,9 +78,15 @@ pipx install "git+https://github.com/public-clis/rdt-cli.git" # Reddit
 npm install -g @snowball-tools/snowball-cli
 ```
 
-### 凭据与环境变量配置
-- **零配置开箱即用**：微信公众号搜索、V2EX、豆瓣影评、B站免登录视频/字幕等无需任何配置。
-- **需授权平台**：根据 `references/` 下各平台的详细说明，将对应 Token 或 Secret 配入当前 profile 的 `.env`（如 `TWITTER_AUTH_TOKEN`、`ZHIHU_ACCESS_SECRET`、`GROQ_API_KEY` 等），Agent 即可无缝调度。
+---
+
+### 🔑 凭据与环境变量配置
+
+- **零配置开箱即用**：微信公众号搜索、V2EX 社区、豆瓣电影影评、B站免登录视频详情与原生字幕等，安装后**无需任何账号和凭据**即可直接使用。
+- **需凭据的平台（智能引导）**：如需使用推特、知乎、Groq 音视频转录等需要鉴权的平台，**无需自己去翻看繁琐的接口文档**。本项目在 `references/` 目录中为每个平台编写了详尽的踩坑指引与维护说明。你只需在对话中对 Agent 说：
+  > *“我想用 agent-reach 的知乎（或推特/小红书）功能，教我怎么配凭据？”*
+  
+  **Agent 会自动阅读对应平台的指南并一步步引导你获取和配置凭证**，遇到 Cookie 刷新、格式要求或权限坑点也会给出明确提示。
 
 ---
 
