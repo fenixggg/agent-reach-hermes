@@ -49,38 +49,61 @@
 
 ---
 
-## 🚀 安装与使用
+## 🚀 一键安装与使用
 
-### 1. 安装到 Hermes Agent
-将本项目克隆到你的 Hermes profile skills 目录下：
+> **💡 最省心方式**：直接把下面这段安装指令**整段复制发给你的 Hermes Agent**，让 Agent 自行完成目录定位、Git 克隆及 Skill 加载：
 
-```bash
-# 进入你正在使用的 Hermes profiles/xxx/skills 目录
-cd path/to/hermes-home/profiles/<your-profile>/skills/
+### 方式 A：发给 Agent 自动安装（推荐 ⭐️）
 
-# 克隆仓库
-git clone https://github.com/fenixggg/agent-reach-hermes.git agent-reach
+直接在 Hermes 对话窗口中发送：
+
+```text
+请帮我把这个 Skill 安装到当前 profile 的 skills 目录下，并重新加载 skills：
+git clone https://github.com/fenixggg/agent-reach-hermes.git <skills_dir>/agent-reach
+然后执行 /reload-skills 检查是否安装成功。
 ```
 
-### 2. 依赖工具配置（按需安装）
-根据你需要的平台，安装对应的开源 CLI 工具：
+*(或者在对话中直接发送：)*
+```text
+帮我安装 GitHub 仓库 fenixggg/agent-reach-hermes 到当前 profile 的 skills/agent-reach 目录，并加载它。
+```
+
+---
+
+### 方式 B：终端手动安装（CLI）
+
+如果你希望在本地终端手动操作：
 
 ```bash
-# Python 平台 CLI
-pipx install xiaohongshu-cli
-pipx install bilibili-cli
-pipx install "git+https://github.com/public-clis/rdt-cli.git"
-pipx install twitter-cli
+# 1. 查找或进入你当前使用的 profile skills 目录（默认 profile 通常在 ~/.hermes/skills/）
+cd ~/.hermes/skills/
 
-# Node / npm 工具 (如有需要)
+# 2. 克隆仓库至 agent-reach 目录
+git clone https://github.com/fenixggg/agent-reach-hermes.git agent-reach
+
+# 3. 在 Hermes 对话窗口中发送 /reload-skills 即可立即生效
+```
+
+---
+
+### 依赖 CLI 工具按需安装
+
+该 Skill 采用轻量化设计，各大平台 CLI **完全解耦、按需安装**。你只需要为你打算使用的平台安装对应 CLI 即可：
+
+```bash
+# 常用平台 Python CLI (推荐 pipx 独立环境安装)
+pipx install xiaohongshu-cli                          # 小红书
+pipx install bilibili-cli                             # B站
+pipx install twitter-cli                              # Twitter / X
+pipx install "git+https://github.com/public-clis/rdt-cli.git" # Reddit
+
+# 股票社区 (雪球)
 npm install -g @snowball-tools/snowball-cli
 ```
 
-### 3. 配置环境变量 / 凭据
-根据 `references/` 目录下各平台的文档指引，配置你的 `.env` 或本地 CLI 认证文件。常见凭据说明：
-- **Groq API Key** (`GROQ_API_KEY`): 用于 `scripts/transcribe.py` 的音视频高速 Whisper 转录。
-- **Twitter Token** (`TWITTER_AUTH_TOKEN`, `TWITTER_CT0`): 写入环境变量供 `twitter-cli` 读取。
-- **知乎 Access Secret** (`ZHIHU_ACCESS_SECRET`): 供知乎官方 CLI 调用。
+### 凭据与环境变量配置
+- **零配置开箱即用**：微信公众号搜索、V2EX、豆瓣影评、B站免登录视频/字幕等无需任何配置。
+- **需授权平台**：根据 `references/` 下各平台的详细说明，将对应 Token 或 Secret 配入当前 profile 的 `.env`（如 `TWITTER_AUTH_TOKEN`、`ZHIHU_ACCESS_SECRET`、`GROQ_API_KEY` 等），Agent 即可无缝调度。
 
 ---
 
