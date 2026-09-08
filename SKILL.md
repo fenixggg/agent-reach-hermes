@@ -11,23 +11,24 @@ description: >
   14 platforms. Zero config for 7 channels.
 
   【路由方式】SKILL.md 包含路由表和常用命令，复杂场景需按需阅读对应分类的 references/*.md。
-  分类：search / social (小红书/推特/B站/V2EX/Reddit) / career(LinkedIn) / dev(github) / web(网页/文章/RSS) / video(YouTube/B站/播客)。
+  分类：search / social (微信/小红书/知乎/B站/雪球/豆瓣/V2EX/推特/Reddit/GitHub) / career(LinkedIn) / web(网页/文章/RSS) / video(YouTube/B站/播客)。
 triggers:
   - search: 搜/查/找/search/搜索/查一下/帮我搜
-  - wechat: 微信/公众号/微信文章/搜微信/查公众号/wechat
   - social:
+    - 微信: 微信/公众号/微信文章/搜微信/查公众号/wechat
     - 小红书: xiaohongshu/xhs/小红书/红书
-    - Twitter: twitter/推特/x.com/推文
+    - 知乎: 知乎/zhihu/知乎搜索/知乎热榜/知乎直答
     - B站: bilibili/b站/哔哩哔哩
-    - V2EX: v2ex
-    - Reddit: reddit
+    - 雪球: 雪球/股票/stock/xueqiu/行情/基金/大V
     - 豆瓣: douban/豆瓣/影评/豆瓣评分/豆瓣短评/电影评分
+    - V2EX: v2ex
+    - Twitter: twitter/推特/x.com/推文
+    - Reddit: reddit
+    - GitHub: github/代码/仓库/gh/issue/pr/分支/commit
   - career: 招聘/职位/求职/linkedin/领英/找工作
-  - dev: github/代码/仓库/gh/issue/pr/分支/commit
   - web: 网页/链接/文章/rss/读一下/打开这个
   - video: youtube/视频/播客/字幕/小宇宙/转录/yt/文字稿/转文字/音频转写
   - transcribe: 转录/转文字/文字稿/字幕/语音转文字/音频转文字/视频转文字
-  - finance: 雪球/股票/stock/xueqiu/行情/基金
 metadata:
   source: Agent-Reach (adapted for Hermes Agent)
   homepage: https://github.com/Panniantong/Agent-Reach
@@ -39,22 +40,34 @@ metadata:
 
 ## 路由表（第一层直达）
 
-| 用户意图 | 平台/分类 | 详细文档 |
-|---------|------|---------|
-| 知乎搜索/热榜/直答 | zhihu | [references/zhihu.md](references/zhihu.md)（官方 CLI） |
-| 雪球帖子/讨论/大V观点 | xueqiu | [references/xueqiu.md](references/xueqiu.md)（snowball-cli） |
-| 小红书 | xhs | [references/xiaohongshu.md](references/xiaohongshu.md) |
-| Twitter/X | twitter | [references/twitter.md](references/twitter.md) |
-| B站 | bili | [references/bilibili.md](references/bilibili.md) |
-| V2EX | v2ex | [references/v2ex.md](references/v2ex.md)（公开API） |
-| Reddit | reddit | [references/reddit.md](references/reddit.md) |
-| 微信公众号文章搜索 | wechat | [references/wechat.md](references/wechat.md) |
-| 网页搜索/代码搜索 | search | [references/search.md](references/search.md) |
-| 豆瓣（电影/影评/短评） | douban | [references/douban.md](references/douban.md) |
-| 招聘/职位/LinkedIn | career | [references/career.md](references/career.md) |
-| GitHub/代码 | dev | [references/dev.md](references/dev.md) |
-| 网页/文章/RSS | web | [references/web.md](references/web.md) |
-| YouTube/播客字幕 | video | [references/video.md](references/video.md) |
+### 1. 国内社交与主流平台（按常用热度排序）
+
+| 平台 / 意图 | 标识 | 核心功能 | 详细文档 |
+|:---|:---:|:---|:---|
+| **微信公众号** | wechat | 搜狗微信直搜、落地真实 URL 解析、极速提取 | [references/wechat.md](references/wechat.md) |
+| **小红书** | xhs | 笔记搜索、图文正文、评论读取（带 xsec） | [references/xiaohongshu.md](references/xiaohongshu.md) |
+| **知乎** | zhihu | 官方 CLI：知乎搜索、全网搜索、热榜、直答 | [references/zhihu.md](references/zhihu.md)（官方 CLI） |
+| **B站 (哔哩哔哩)** | bili | 视频详情、免登录字幕提取、热门排行榜、动态 | [references/bilibili.md](references/bilibili.md) |
+| **雪球** | xueqiu | 投资热帖、个股 KOL 讨论流、社区观点（行情兜底） | [references/xueqiu.md](references/xueqiu.md)（snowball-cli） |
+| **豆瓣** | douban | 电影/影视详情、长篇影评、短评深度抓取（Rexxar API） | [references/douban.md](references/douban.md) |
+| **V2EX** | v2ex | 程序员社区节点主题、全站热门（免登录官方API） | [references/v2ex.md](references/v2ex.md) |
+
+### 2. 海外社交与开发者平台（按常用热度排序）
+
+| 平台 / 意图 | 标识 | 核心功能 | 详细文档 |
+|:---|:---:|:---|:---|
+| **Twitter / X** | twitter | 时间线、推文详情、长文、用户资料 | [references/twitter.md](references/twitter.md) |
+| **Reddit** | reddit | 帖子阅读、多层评论流、Subreddit 热门 | [references/reddit.md](references/reddit.md) |
+| **GitHub** | github | 仓库检索、代码搜索、Issue / PR 处理 | [references/dev.md](references/dev.md) |
+
+### 3. 通用搜索、网页读取与多媒体
+
+| 类别 / 意图 | 标识 | 核心功能 | 详细文档 |
+|:---|:---:|:---|:---|
+| **网页搜索 / 代码搜索** | search | Tavily 结构化搜索、Exa AI 深度检索 | [references/search.md](references/search.md) |
+| **网页 / 文章 / RSS** | web | Firecrawl 浏览器渲染、Jina Reader 降噪 | [references/web.md](references/web.md) |
+| **YouTube / 播客字幕** | video | yt-dlp 字幕提取、小宇宙播客、音视频转录 | [references/video.md](references/video.md) |
+| **职场招聘 / LinkedIn** | career | 领英职位搜索与人才检索 | [references/career.md](references/career.md) |
 
 > 旧 `social.md` 已拆分为上述各平台独立文档，按行直达，不再需要先读 social 总览。
 
@@ -148,7 +161,7 @@ pip list 2>nul | findstr "xiaohongshu-cli twitter-cli bilibili-cli rdt-cli"
 - [Reddit](references/reddit.md) — rdt-cli
 - [豆瓣抓取](references/douban.md) — 电影/影评/短评，rexxar 移动版 API（免登录免验证码）
 - [职场招聘](references/career.md) — LinkedIn
-- [开发工具](references/dev.md) — GitHub CLI
+- [GitHub / 代码工具](references/dev.md) — GitHub CLI (gh)
 - [网页阅读](references/web.md) — Jina Reader, RSS, 各工具选型对比
 - [网页工具速查](references/web-tools.md) — 搜索 vs 读取，一页速查
 - [视频播客](references/video.md) — YouTube, B站, 小宇宙
