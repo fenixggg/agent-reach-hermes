@@ -11,10 +11,11 @@ description: >
   14 platforms. Zero config for 7 channels.
 
   【路由方式】SKILL.md 包含路由表和常用命令，复杂场景需按需阅读对应分类的 references/*.md。
-  分类：social (微信/小红书/知乎/B站/雪球/豆瓣/V2EX/推特/Reddit/LinkedIn/GitHub) / video (视频转录与字幕: YouTube/B站/小红书/小宇宙播客) / web (网页/文章/RSS)。
+  分类：social (微信/微博/小红书/知乎/B站/雪球/豆瓣/V2EX/推特/Reddit/LinkedIn/GitHub) / video (视频转录与字幕: YouTube/B站/小红书/小宇宙播客) / web (网页/文章/RSS)。
 triggers:
   - social:
     - 微信: 微信/公众号/微信文章/搜微信/查公众号/wechat
+    - 微博: 微博/weibo/微博热搜/微博搜索/微博评论/微博博主
     - 小红书: xiaohongshu/xhs/小红书/红书
     - 知乎: 知乎/zhihu/知乎搜索/知乎热榜/知乎直答
     - B站: bilibili/b站/哔哩哔哩
@@ -46,6 +47,7 @@ metadata:
 | 平台 / 意图 | 标识 | 核心功能 | 详细文档 |
 |:---|:---:|:---|:---|
 | **微信公众号** | wechat | 搜狗微信直搜、落地真实 URL 解析、极速提取 | [references/wechat.md](references/wechat.md) |
+| **微博** | weibo | 热搜榜、正文/评论/转发、内置脚本网页稳定搜索 | [references/weibo.md](references/weibo.md) |
 | **小红书** | xhs | 笔记搜索、图文正文、评论读取（带 xsec） | [references/xiaohongshu.md](references/xiaohongshu.md) |
 | **知乎** | zhihu | 官方 CLI：知乎搜索、全网搜索、热榜、直答 | [references/zhihu.md](references/zhihu.md)（官方 CLI） |
 | **B站 (哔哩哔哩)** | bili | 视频详情、免登录字幕提取、热门排行榜、动态 | [references/bilibili.md](references/bilibili.md) |
@@ -125,6 +127,12 @@ rdt read POST_ID
 # V2EX 热门
 curl -s "https://www.v2ex.com/api/topics/hot.json" -H "User-Agent: agent-reach/1.0"
 
+# 微博热搜
+weibo hot --count 10
+
+# 微博关键词搜索 (内置脚本解析网页版，稳定避开移动端 ok=-100)
+python <skill-path>/scripts/s_weibo_search.py "关键词" 1
+
 # 小红书搜索
 xhs search "query"
 
@@ -152,6 +160,7 @@ pip list 2>nul | findstr "xiaohongshu-cli twitter-cli bilibili-cli rdt-cli"
 根据用户需求，阅读对应的详细文档：
 
 - [知乎](references/zhihu.md) — 官方 Zhihu CLI：搜索/热榜/直答/额度
+- [微博](references/weibo.md) — weibo-cli + s_weibo_search.py：热搜/搜索/详情/评论
 - [雪球](references/xueqiu.md) — snowball-cli：帖子/讨论/KOL观点（行情兜底走东财API）
 - [小红书](references/xiaohongshu.md) — xhs-cli
 - [Twitter/X](references/twitter.md) — twitter-cli

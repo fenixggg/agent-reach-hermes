@@ -14,6 +14,7 @@
 | 平台 / 类别 | 工具载体 | 核心能力 | 认证需求 |
 | :--- | :--- | :--- | :--- |
 | **知乎 (Zhihu)** | 官方 Zhihu CLI | 搜索、热榜、直答 | 需平台 Secret |
+| **微博 (Weibo)** | `weibo-cli` + 内置搜索脚本 | 热搜榜、正文/评论、网页稳定搜索 | 免登录 / 需 Cookie |
 | **雪球 (Xueqiu)** | `snowball-cli` | 实时热帖、KOL观点、社区讨论 | 需 Cookie |
 | **小红书 (XHS)** | `xhs-cli` | 笔记搜索、图文阅读（带 xsec） | 需本地 Cookie |
 | **推特 / X** | `twitter-cli` | 推文读取、用户主页、时间线 | 需 Auth Token |
@@ -71,6 +72,7 @@ https://github.com/fenixggg/agent-reach-hermes
 # 常用平台 Python CLI (可手动安装或让 Agent 帮装)
 pipx install xiaohongshu-cli                          # 小红书
 pipx install bilibili-cli                             # B站
+pipx install kabi-weibo-cli                           # 微博 (weibo 命令)
 pipx install twitter-cli                              # Twitter / X
 pipx install "git+https://github.com/public-clis/rdt-cli.git" # Reddit
 
