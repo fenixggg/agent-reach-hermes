@@ -36,8 +36,23 @@ weibo status
 | `~/.config/weibo-cli/credential.json` | **CLI 与搜索脚本读取的主凭证**，包含 `{"cookies": {"SUB", "SUBP"}}` |
 | profile `.env` | 可选灾备副本（如配置 `WEIBO_SUB`） |
 
-- **凭证有效期**：微博网页端 SUB cookie 通常具有滑动有效期。
-- **失效识别**：搜索脚本报 `SESSION_EXPIRED` 时，重新扫码或更新 `credential.json` 即可。
+- **凭证 7 天 TTL 机制与真相**：
+  - `SUB` cookie 本身无内嵌过期（非 JWT），服务器端实际有效期通常 30 天以上；
+  - `kabi-weibo-cli` 内部设置了 7 天的本地刷新建议期，TTL 到期后 CLI 会尝试从浏览器重新提取，提取失败时会输出警告 `using existing cookies` 自动回退；
+  - **关键原则**：只要 API 没有返回 `ok=-100` 或搜索脚本没有报 `SESSION_EXPIRED`，现有凭据就完全可以继续使用，无需频繁重新扫码。真正失效时再重新抓取 SUB/SUBP 写入即可。
+
+## 能力矩阵
+
+| 功能 | 工具 | 状态 |
+|---|---|---|
+| 热搜榜 | `weibo hot --count 10` | ✅ 免登录也可用 |
+| 关键词搜索 | **`s_weibo_search.py`** | ✅ 网页端精准解析，避开移动端风控 |
+| 微博详情 | `weibo detail <mid>` | ✅ 完整正文+互动统计 |
+| 评论流 | `weibo comments <mid> --count 10` | ✅ |
+| 转发列表 | `weibo reposts <mid>` | ✅ |
+| 用户资料/微博列表/关注/粉丝 | `weibo profile/posts/... <uid>` | ✅ |
+| 热门时间线 | `weibo feed` | ✅ |
+| 关注者时间线 | `weibo home` | 需登录（已配置） |
 
 ## 常用命令速查
 
@@ -63,7 +78,8 @@ weibo posts <uid> --count 10
 weibo feed --count 10
 ```
 
-## 注意事项
+## 已知避坑指南
 
-- **搜索机制说明**：`weibo-cli` 自带的 `weibo search` 走移动端 API，部分情况下可能返回会话无效；因此关键词搜索推荐统一使用本 Skill 内置的 `s_weibo_search.py` 脚本，该脚本直连 `s.weibo.com` 网页解析，兼容性更强。
-- **输出格式**：非 TTY 环境默认输出 YAML；如果需要结构化数据，加上 `--json` 参数即可。
+- **`weibo search` 不可用**：官方移动 API 容器接口对 SUB cookie 常返回 `ok=-100`（会话无效）。搜索推荐统一调用本 Skill 内置的 `s_weibo_search.py`（直连 `s.weibo.com` 网页解析，非常稳定）。
+- **`weibo login --cookie-source edge` 权限受限**：Edge 开启 App-Bound Encryption 会触发 `RequiresAdminError`。手动配置 `credential.json` 是最稳健的方案。
+- **输出格式**：非 TTY 环境下 CLI 默认输出 YAML；在脚本或代码中解析时加上 `--json` 即可输出干净的 JSON 字典。
