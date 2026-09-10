@@ -1,15 +1,22 @@
 # 雪球 / Xueqiu (snowball-cli)
 
-## 安装与环境配置
+## 安装（2026-09-08 已完成，重装/迁移时按此流程）
 
 ```bash
-# 全局安装 snowball-cli
-npm install -g @snowball-tools/snowball-cli
+npm install -g snowball-cli        # 官方 npm 包（baixianger/snowball-cli 的发行版）
+# ⚠️ 本机补丁（npm update/重装会清掉，需重打）:
+#    1. esbuild 重编译: npx esbuild <包目录>\index.ts --bundle --platform=node --format=cjs --outfile=<包目录>\dist\index.js
+#    2. dist/index.js 头部 ESM require shim 改 createRequire（否则 node24 下 Dynamic require of "fs" 崩溃）
+#    验证补丁在位: snowball help 输出里含 search-posts
+# 本机补丁内容: search-posts 命令（关键词搜雪球帖子, 上游 api.ts 有函数但没注册成命令）
 ```
 
-> **定位**：雪球**帖子/讨论内容/KOL动态**专用工具（基础股票实时行情走公开金融API更轻量，详见下方兜底说明）。专为 AI Agent 设计，原生结构化输出。
+> 雪球**帖子/讨论内容**的专用工具（行情走东财公开API更快，见下方兜底）。
+> v0.3.1，npm 全局安装。专为 AI Agent 设计，JSON 输出。
 
-## 登录态与凭证
+## 登录态
+
+社交类命令需要登录态（已配置，凭证位置见下方表格）：
 
 ```bash
 snowball login          # 终端二维码，用雪球App扫码
@@ -18,12 +25,12 @@ snowball token <cookie> # 手动粘贴 DevTools 里的 cookie
 snowball status         # 检查登录态
 ```
 
-## 凭证存放位置与维护说明
+## 凭证存放位置（2026-09-08 现状）
 
 | 位置 | 说明 |
 |---|---|
-| `~/.snowball-cli/token.json` | **CLI 实际读取的**，含完整 cookie |
-| profile `.env` 的 `SNOWBALL_COOKIE` | 可作为灾备副本；token.json 丢失时用 `snowball token "<.env里的值>"` 恢复 |
+| `~/.snowball-cli/token.json`（即 `~/.snowball-cli/`） | **CLI 实际读取的**，含完整 cookie |
+| profile `.env` 的 `SNOWBALL_COOKIE` | 灾备副本；token.json 丢失时用 `snowball token "<.env里的值>"` 恢复 |
 
 - Token 无固定 TTL（雪球 cookie 滑动续期）；失效场景：其他设备登录顶号、风控踢、长期不用
 - 失效恢复：`snowball login` 重扫（二维码 2 分钟窗口，自动换码最多 3 次）→ 记得同步更新 `.env` 副本
@@ -85,6 +92,11 @@ snowball post <id>
 1. **发现帖子**：`snowball trending` / `kol <sym>` → `user <id>` 拿帖子列表和 ID
 2. **站内关键词搜索**：Tavily 加 `site:xueqiu.com 关键词` 拿帖子 URL（`xueqiu.com/<uid>/<postid>` 格式）
 3. **读帖子全文**：用 Firecrawl 渲染帖子页（走 10Router `/v1/web/fetch`，model=firecrawl）——已实测成功，SSR 正文完整含 markdown 图床链接
+   - ⚠️ **勿裸调 PATH 里的 `firecrawl` CLI**（2026-09-09 两边都复现过 404）：CLI 的 axios 读到 `HTTP_PROXY/HTTPS_PROXY` 环境变量会把 URL 误拼进请求路径（`http://127.0.0.1https://api.firecrawl.dev/...`），升级 v1.23.3 仍存在。正确姿势：
+     - WorkBuddy：`bash <skills-path>/firecrawl-cli/scripts/firecrawl.sh scrape "帖子URL"`（包装脚本自动清代理+加载 key）
+     - Hermes：先 `$env:HTTP_PROXY=''; $env:HTTPS_PROXY='';` 再 `firecrawl scrape`
+     - 判断是不是这个坑：REST 直调 `api.firecrawl.dev/v2/scrape` 返回 200 而 CLI 报 404 → 即此 bug
+   - **WorkBuddy 侧备选（2026-09-09 实测）**：Tavily `/extract` 端点 + `extract_depth: "advanced"`（服务端渲染可过雪球 WAF），用 `Hermes .env` 的 `TAVILY_API_KEY` 直调（POST api.tavily.com/extract），实测拿到 21.8KB 完整正文+评论区；正文夹在「来源：雪球App」与「风险提示」之间。extract 额度与 search 分开计。
 4. 行情兜底走东财 API（见上）
 
 ## 兜底与注意
