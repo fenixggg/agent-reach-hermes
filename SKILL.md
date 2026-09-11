@@ -133,6 +133,11 @@ xhs search "query"
 # 小红书读笔记
 xhs read NOTE_ID_OR_URL
 
+# 小红书读评论（必须带 xsec_token 的完整URL；--all 自动翻页）
+# ⚠️ 若报 {code:-1}/HTTP 406：升级依赖 python -m pip install --upgrade xhshow（非 pipx upgrade）
+xhs comments NOTE_ID_OR_URL --json
+xhs comments NOTE_ID_OR_URL --all --json
+
 # 视频转录（B站/YouTube/小红书/通用）
 python <skill-path>/scripts/transcribe.py "URL" [输出目录]
 

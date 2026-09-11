@@ -93,10 +93,10 @@ snowball post <id>
 2. **站内关键词搜索**：Tavily 加 `site:xueqiu.com 关键词` 拿帖子 URL（`xueqiu.com/<uid>/<postid>` 格式）
 3. **读帖子全文**：用 Firecrawl 渲染帖子页（走 10Router `/v1/web/fetch`，model=firecrawl）——已实测成功，SSR 正文完整含 markdown 图床链接
    - ⚠️ **勿裸调 PATH 里的 `firecrawl` CLI**（2026-09-09 两边都复现过 404）：CLI 的 axios 读到 `HTTP_PROXY/HTTPS_PROXY` 环境变量会把 URL 误拼进请求路径（`http://127.0.0.1https://api.firecrawl.dev/...`），升级 v1.23.3 仍存在。正确姿势：
-     - WorkBuddy：`bash <skills-path>/firecrawl-cli/scripts/firecrawl.sh scrape "帖子URL"`（包装脚本自动清代理+加载 key）
+     - 备选环境：`bash <skills-path>/firecrawl-cli/scripts/firecrawl.sh scrape "帖子URL"`（包装脚本自动清代理+加载 key）
      - Hermes：先 `$env:HTTP_PROXY=''; $env:HTTPS_PROXY='';` 再 `firecrawl scrape`
      - 判断是不是这个坑：REST 直调 `api.firecrawl.dev/v2/scrape` 返回 200 而 CLI 报 404 → 即此 bug
-   - **WorkBuddy 侧备选（2026-09-09 实测）**：Tavily `/extract` 端点 + `extract_depth: "advanced"`（服务端渲染可过雪球 WAF），用 `Hermes .env` 的 `TAVILY_API_KEY` 直调（POST api.tavily.com/extract），实测拿到 21.8KB 完整正文+评论区；正文夹在「来源：雪球App」与「风险提示」之间。extract 额度与 search 分开计。
+   - **备选方案（2026-09-09 实测）**：Tavily `/extract` 端点 + `extract_depth: "advanced"`（服务端渲染可过雪球 WAF），用 `Hermes .env` 的 `TAVILY_API_KEY` 直调（POST api.tavily.com/extract），实测拿到 21.8KB 完整正文+评论区；正文夹在「来源：雪球App」与「风险提示」之间。extract 额度与 search 分开计。
 4. 行情兜底走东财 API（见上）
 
 ## 兜底与注意
