@@ -17,11 +17,16 @@ rdt status    # 验证
 ## 命令
 
 ```bash
-# 搜索帖子
-rdt search "query" --limit 10
+# ⭐ 搜索（agent 首选）：泛化包装脚本，紧凑输出每帖 2-3 行，自动规避 --yaml 尺寸炸弹与 JSON 缺陷
+#   支持裸 ID/t3_ 前缀/reddit URL；--json 出信封；--save-to 落盘 UTF-8 无 BOM
+python <skill-path>/scripts/rdt_search.py "query" --limit 10 --snip 220
 
-# 读帖子全文 + 评论
-# ⚠️ 必须用裸 ID（如 1s332po），带 t3_ 前缀（t3_1s332po）会返回 not_found（2026-10-02 实测）
+# ⭐ 读帖 + 评论（agent 首选）：双路径解析（严格 JSON → 失败自动降级正则提取），
+#   评论按赞数排序，--max-comments/--max-body 控制 token
+python <skill-path>/scripts/rdt_read.py <POST_ID或URL> --max-comments 30 --max-body 700
+
+# 裸 rdt 命令（人工调试用，agent 慎用，原因见下方已知坑）
+rdt search "query" --limit 10
 rdt read POST_ID
 
 # 浏览 subreddit
@@ -49,4 +54,14 @@ rdt all --limit 10
 
 > **安装**: `pipx install 'git+https://github.com/public-clis/rdt-cli.git'`（PyPI 版本暂时落后，需从 GitHub 装 v0.4.2+）。需要先登录（`rdt login`）才能搜索和阅读。
 > 需要登录的功能：`rdt feed --subs-only`（订阅列表）、`rdt saved`（收藏）。
-> 建议使用 `--yaml` 输出，对 AI agent 更友好。
+
+## ⚠️ 已知坑与 agent 用法（2026-10-03 实测，v0.4.2）
+
+| 症状 | 根因 | 处置 |
+|---|---|---|
+| `read --json` 输出**间歇性**非法 JSON（comments 数组后跟无键名的裸 ID 数组），`ConvertFrom-Json`/`json.loads` 必炸 | rdt-cli 序列化 bug | 用 `scripts/rdt_read.py`：先走严格 JSON，失败自动降级正则提取五元组（author/body/parent/score），坏样本单测覆盖可 100% 恢复内容 |
+| `search --yaml` 单次可吐 **35 万字符**（含帖子全文+HTML），瞬间撑爆 agent 上下文 | yaml 输出含全部元数据+正文 | **agent 禁用 --yaml**（旧版文档"建议 --yaml"已作废）；用 `scripts/rdt_search.py`（--json + 紧凑字段，每帖 2-3 行） |
+| `read --json` 是否走严格路径成功**因帖而异** | bug 触发条件未知（同帖不同时段表现不同） | 双路径包装脚本已兜底，输出统一，无需人工判别 |
+| 搜索相关性一般，泛词混入无关结果 | Reddit 搜索本身特性 | 拆具体关键词多次搜（dental / MRI / hospital experience 分开），再按 score/num_comments 筛 |
+| `rdt read` 带 `t3_` 前缀报 not_found（2026-10-02 实测） | CLI 只认裸 ID | `rdt_read.py` 的 ID 归一化已自动处理（URL/t3_ 前缀/裸 ID 均可） |
+| stderr 恒有 `Cookie refresh failed; using existing cookies` | Edge App-Bound Encryption 导致自动刷新失败 | 无害警告，JWT 没过期就无视（见上方凭证章节） |

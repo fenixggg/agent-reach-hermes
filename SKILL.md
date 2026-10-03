@@ -8,7 +8,7 @@ description: >
   今日头条/toutiao/头条/微头条, 维基百科/wikipedia/百科, Wikidata/wikidata/Q编号/实体消歧, Quora/Quora问答/Quora回答, or any web URL.
 
   Also MUST USE for: web搜索/搜/查/找/look up/research, 招聘/求职/jobs, 分享的链接/URL.
-  Routes to CLI tools: wechat_search.py, s_wechat_article.py, zhihu-cli, snowball-cli, xhs-cli, twitter-cli, bili, rdt-cli, gh, yt-dlp, tw_run.py, s_toutiao.py, s_wikipedia.py, s_wikidata.py, s_quora.py.
+  Routes to CLI tools: wechat_search.py, s_wechat_article.py, zhihu-cli, snowball-cli, xhs-cli, twitter-cli, bili, rdt-cli, gh, yt-dlp, tw_run.py, s_toutiao.py, s_wikipedia.py, s_wikidata.py, s_quora.py, rdt_search.py, rdt_read.py.
   17 platforms (维基百科+Wikidata 合为一个渠道). 严格零配置渠道 5 个（微信/头条/V2EX/豆瓣/维基+Wikidata），其余部分命令免登录（weibo 热搜、bili 读命令、snowball 行情）或消耗积分（Quora 走 Firecrawl，1积分/次）。career/LinkedIn 当前为死渠道。
 
   【路由方式】SKILL.md 包含路由表和常用命令，复杂场景需按需阅读对应分类的 references/*.md。
@@ -146,11 +146,11 @@ yt-dlp --write-sub --write-auto-sub --sub-lang "zh-Hans,zh,en" --convert-subs sr
 # ✅ YouTube：2026-10-02 实测恢复可用（格式侦察 RC=0 含 4K）
 #    ⚠️ 真实下载前建议先 -F 侦察确认，详见 references/video.md
 
-# Reddit 搜索
-rdt search "query" --limit 10
+# Reddit 搜索 (优先用 rdt_search 脚本，紧凑输出，规避 --yaml 35万字尺寸炸弹)
+python <skill-path>/scripts/rdt_search.py "query" --limit 10 --snip 220
 
-# Reddit 读帖 + 评论
-rdt read POST_ID
+# Reddit 读帖 + 评论 (优先用 rdt_read 脚本，双路径解析容错 rdt-cli 非法 JSON)
+python <skill-path>/scripts/rdt_read.py <POST_ID或URL> --max-comments 30 --max-body 700
 
 # V2EX 热门
 curl -s "https://www.v2ex.com/api/topics/hot.json" -H "User-Agent: agent-reach/1.0"
