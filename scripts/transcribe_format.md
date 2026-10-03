@@ -3,6 +3,12 @@
 ## 执行者
 Hermes 在收到 `transcribe.py` 输出的 raw.txt 后执行此格式化步骤。
 
+### 润色模型（2026-09-26 用户指定）
+- **统一用 `cbcn/deepseek-v4.1-flash`** 走 10Router 网关做断句润色（本文件模板里的「DSv4Flash 润色」字样即指它；带 `cbcn/` 前缀写法 2026-09-26 实测可用）。
+- ⚠️ `sn/deepseek-v4-flash` 禁用：网关返回 200 但 `content` 为空（2026-09-26 实测）。
+- 现成脚本：`E:\AI Output\Hermes-Workspace\scripts\polish_transcript.py` —— 读 raw.txt + meta.json → 调网关润色 → 落 transcript.md；换视频时改文件头 RAW/META/OUT 三个路径即可。
+- 润色后建议快速扫一遍同音错字（Whisper 高频错误如 Cloud 5→Claude 5、看完钱→开盘前），模型不一定全抓到。
+
 ## 输入
 - `*_raw.txt` — Groq Whisper 输出的原始文字，无标点/分段
 - `*_meta.json` — 视频标题、时长、来源URL

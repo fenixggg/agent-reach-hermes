@@ -1,11 +1,17 @@
 # 小红书 / XiaoHongShu (xhs-cli)
 
-## 安装与登录（2026-09-08 已配置，重装/迁移时按此流程）
+## 安装与登录（2026-09-24 迁移 uv tool，重装/迁移时按此流程）
 
 ```bash
-pipx install xiaohongshu-cli    # 安装
+uv tool install xiaohongshu-cli@latest --force   # 安装（⚠️ 历史上是 pipx，2026-09-24 实测环境已迁到 uv tool）
 xhs login                       # 自动从浏览器提取 Cookie（需浏览器已登录小红书）
 ```
+
+> ⚠️ **升级姿势（2026-09-24 实测更正②的修复方法）**：
+> - `uv tool upgrade xiaohongshu-cli` 对精确锁定的版本**无效**（提示 pinned）
+> - 正确姿势：`uv tool install xiaohongshu-cli@latest --force` 重装（CLI 版本不变也会重解析依赖）
+> - 实测效果：环境内 xhshow 0.1.0 → 0.2.0（老环境是历史锁死的解析结果，比 CLI 声明的 `>=0.1.9` 还旧）
+> - 验证：`uv tool run --from xiaohongshu-cli python -c "import xhshow; print(xhshow.__version__)"`
 
 > Cookie 落盘 `~/.xiaohongshu-cli/cookies.json`（位置详情见下方凭证章节）。
 
@@ -55,8 +61,8 @@ https://www.xiaohongshu.com/explore/<note_id>?xsec_token=<token>&xsec_source=pc_
 
 **修复（一条命令）**：
 ```bash
-# xhs-cli venv 在 <pipx-venv-path>/xiaohongshu-cli
-$env:PATH = "<pipx-venv-path>/xiaohongshu-cli\Scripts;" + $env:PATH
+# xhs-cli venv 在 <pipx-venv-path>\xiaohongshu-cli
+$env:PATH = "<pipx-venv-path>\xiaohongshu-cli\Scripts;" + $env:PATH
 python -m pip install --upgrade "xhshow==0.2.0"   # 0.1.9 → 0.2.0
 # 验证：xhs comments <带xsec_token的URL> --json → ok:true
 ```
@@ -174,12 +180,32 @@ xhs favorites              # ✅ ok:true
 #   升级依赖后一并修复。若日后再次集体报 -1，优先排查 xhshow 版本，而非怀疑账号/平台。
 ```
 
+### ⑧ `read` 返回 `empty noteDetailMap` + `Captcha triggered` ≠ 依赖问题，是风控（2026-09-24 实测，勿与②混淆）
+
+```
+❌ 症状A：xhs read <带token的URL> → 'Failed to parse __INITIAL_STATE__ JSON'（页面结构变异）
+❌ 症状B：xhs read → 'Note not found in HTML state: empty noteDetailMap'（-v 可见 WARNING: Captcha triggered）
+   两个症状同一根因：read 的 HTML 通道被风控拦截，返回空壳页
+```
+
+**关键鉴别（2026-09-24 排障实录）**：
+- `xhs search` / `status` 全部正常 → cookie 有效、签名没坏
+- 只有 `read` 挂 → **不是 xhshow 版本问题**（当时刚升到 0.2.0，症状不变）
+- 触发点：高频 read / IP 风控分上升。`-v` 日志出现 `Captcha triggered (count=1), cooling down 5s` 是铁证
+- 新鲜 xsec_token 也救不了（对照实验：新搜→立刻读→仍 empty noteDetailMap）
+
+**处置**：
+1. read 挂掉期间，读笔记正文改走 **firecrawl wrapper**（能拿到标题+部分正文，图文笔记正文多在图片里拿不全，可接受）
+2. 验证码冷却通常几小时~一天，之后 read 可能自愈
+3. 想立即恢复：`xhs login` 重刷 cookie 重置风控分（需浏览器已登录小红书）
+4. 判别流程：read 失败先跑 `xhs status`（查登录态）→ 带 `-v` 跑一次（查 captcha 关键字）→ 都正常才怀疑 xhshow 版本（走②的修复）
+
 ## 凭证存放位置（2026-09-08 实测）
 
 | 项 | 状态 |
 |---|---|
 | Cookie 文件 | `~/.xiaohongshu-cli/cookies.json`（**CLI 实际读取的**，含 web_session 等 16 个键） |
-| .env | 无条目（xhs-cli 只认本地 cookie 文件，无需 env） |
+| .env | `XHS_COOKIE_PATH=%USERPROFILE%\.xiaohongshu-cli\cookies.json`（**仅记录文件路径，不放 cookie 值**） |
 | 当前状态 | ✅ 有效（2026-06-27 更新，实测 `xhs read` 正常返回） |
 | 失效恢复 | `xhs login`（自动从浏览器提取 Cookie，需浏览器已登录小红书） |
 | 注意 | cookie 含 `web_session` 登录态，**明文文件**，不要复制到别处 |

@@ -35,14 +35,20 @@ def get_groq_key():
     key = os.getenv("GROQ_API_KEY", "")
     if key:
         return key
-    # 尝试从 Hermes .env 文件读取
-    hermes_home = os.getenv("HERMES_HOME") or os.path.expanduser("~/.hermes")
-    env_path = os.path.join(hermes_home, ".env")
-    if os.path.isfile(env_path):
-        with open(env_path, "r", encoding="utf-8") as f:
-            for line in f:
-                if line.startswith("GROQ_API_KEY="):
-                    return line.split("=", 1)[1].strip()
+    # 尝试从 Hermes .env 文件读取（按优先级尝试本机已知 home 位置）
+    candidates = []
+    hh = os.getenv("HERMES_HOME")
+    if hh:
+        candidates.append(os.path.join(hh, ".env"))
+    # 本机 Desktop profile 真身，~/.hermes 仅作为通用兜底
+    candidates.append(r"~/.hermes/.env")
+    candidates.append(os.path.join(os.path.expanduser("~"), ".hermes", ".env"))
+    for env_path in candidates:
+        if os.path.isfile(env_path):
+            with open(env_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    if line.startswith("GROQ_API_KEY="):
+                        return line.split("=", 1)[1].strip()
     raise RuntimeError(
         "GROQ_API_KEY not found. "
         "Add to Hermes .env: GROQ_API_KEY=gsk_xxxxx"
@@ -283,7 +289,8 @@ def get_xhs_content(note_id, xsec_token=None):
 
 # ─── Main ──────────────────────────────────────────────────
 def main():
-    if len(sys.argv) < 2:
+    # 参数守卫（2026-10-02）：-h/--help 打印用法退出，不进下载逻辑
+    if len(sys.argv) < 2 or sys.argv[1].strip() in ("-h", "--help"):
         print("Usage: python transcribe.py <视频URL 或 BV号 或 小红书笔记ID> [输出目录]")
         print()
         print("支持平台:")
@@ -291,7 +298,7 @@ def main():
         print("  YouTube: https://www.youtube.com/watch?v=xxx")
         print("  小红书:  https://www.xiaohongshu.com/explore/xxxx 或裸note_id")
         print("  其他:    自动尝试 yt-dlp 支持的平台")
-        sys.exit(1)
+        sys.exit(0)
 
     url_or_bvid = sys.argv[1].strip()
     output_dir = sys.argv[2] if len(sys.argv) > 2 else os.getcwd()

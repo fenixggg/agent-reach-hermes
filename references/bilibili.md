@@ -168,8 +168,8 @@ ffmpeg -y -i audio.m4s -vn -ac 1 -ar 16000 -b:a 64k audio.mp3
 
 | 坑 | 现象 | 解法 |
 |---|---|---|
-| `bili audio` 失效 | `获取音频流: 'NoneType' object has no attribute 'value'` | 绕开 CLI，直接用 `x/player/playurl` 手拉 dash |
-| `yt-dlp` 被拦 | `HTTP Error 412` | B站加大反爬，改用上面的官方 API 路径 |
+| `bili audio` 失效 | 卡死无产物（下载中挂住，300s 超时强杀，只落几 KB 半成品） | **下载一律走 yt-dlp**，见 [video.md](video.md) |
+| `yt-dlp` 被拦 | `HTTP Error 412` | **先查 yt-dlp 版本**：< 2026.07.04 必 412，`yt-dlp -U` 升级即修（2026-09-18 实测确认）。该 412 与代理/Cookie/UA/签名/限流全部无关 |
 | UP主视频列表 | `bili user-videos` 返回 title 有值但 owner/stats 全空 | 拿 bvid 再逐个调 `view` 接口补数据；`space/arc/search`（含 wbi 版）已 412/-799 |
 | 弹幕乱码 | `'utf-8' codec can't decode byte 0x94` | 响应是 deflate，先解压再 decode |
 | PowerShell 脚本中文乱码 | `.ps1` 里中文全部变成 `娴佹氮姹` | PS 5.1 读无 BOM 的 .ps1 会按 GBK 解析 → **复杂中文逻辑改写成 Python 脚本** |
@@ -189,6 +189,7 @@ bili login                              # 扫码登录
 | 项 | 状态 |
 |---|---|
 | 登录态文件 | `~/.bilibili-cli/credential.json`（**CLI 实际读取的**，字段：sessdata/bili_jct/ac_time_value/buvid3/buvid4/dedeuserid/saved_at） |
+| .env | `BILIBILI_CREDENTIAL_PATH=%USERPROFILE%\.bilibili-cli\credential.json`（**仅记录文件路径，不放 cookie 值**） |
 | 当前状态 | ✅ 已登录（2026-09-10 21:54 重配，user: <your_username> Lv4，favorites/history/watch-later 实测全部通过） |
 | 重配优先级 | 读类命令免登录，不配也能干活；仅 `favorites`/`watch-later`/`history`/`feed`/`like`/`coin`/`triple` 需要 |
 | 过期征兆 | stderr 出现 `bili_cli.auth: Saved credential is expired, clearing` → **文件已被 CLI 静默删除** |
@@ -288,10 +289,14 @@ source：`pipx\venvs\<pkg>\Lib\site-packages\<pkg>_cli\auth.py`
 ## 注意
 
 > **bilibili-cli 自身**（`bili` 命令）走官方 API 且请求头正确，实测不触发 412。
-> 但 **yt-dlp 直连已 412**（2026-09-10 实测），`space/arc/search` 类接口也 412 或 -799，
-> 需要这类数据时改走 `x/web-interface/view` 逐条取。
+> `space/arc/search` 类接口仍 412 或 -799，需要这类数据时改走 `x/web-interface/view` 逐条取。
 > 如果 `bili` 遇到 `HTTP 412` / `RateLimitError`，稍等重试或减小 `--max`。
 > 建议用 `--yaml` 输出，对 AI agent 更友好（非 TTY 环境默认输出 YAML）。
+>
+> **⚠️ 已更新的结论（2026-09-18）**：**yt-dlp 抓 B站 的 412 问题已不再是"反爬"**。
+> 根因是版本 bug，官方已在 2026.07.04 修复；`yt-dlp -U` 升级后 **3/3 实测通过，且画质达 1920x1080**。
+> **下载视频文件首选 yt-dlp**（详见 [video.md](video.md) 的 B站 章节）；
+> `bili` 专注元数据/字幕/评论。**不要用 `bili audio`**（会卡死无产物）。
 
 ### 输出格式速查（选错会白跑）
 

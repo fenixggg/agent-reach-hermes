@@ -1,6 +1,6 @@
 # GitHub (gh CLI)
 
-GitHub 官方命令行工具，用于仓库、Issue、PR、Actions、Release 以及 API 访问。支持通过环境变量或 gh auth login 认证。
+GitHub 官方命令行工具，用于仓库、Issue、PR、Actions、Release 以及 API 访问。本机已登录（fenixggg）。
 
 ### 认证
 

@@ -9,7 +9,7 @@ Agent Reach 的 twitter-cli、Hermes 内置的 `x_search`、以及第三方 bird
 | 原理 | 逆向 Twitter GraphQL API | xAI 官方 Responses API | GraphQL + Sweetistics SaaS |
 | 语言/安装 | Python, `pipx install` | Hermes 内置（xAI 后端） | TypeScript, `pnpm + build` |
 | 成本 | **免费**（维护 Cookie） | **付费**（订阅或 API key） | 免费（GraphQL）/ 另付（Sweetistics） |
-| 搜索稳定性 | ⚠️ 经常 404 | ✅ 官方渠道，稳定 | ⚠️ 同 twitter-cli，除非上 Sweetistics |
+| 搜索稳定性 | ✅ 已修复（2026-09-14 POST 补丁，2026-10-02 复测 RC=0） | ✅ 官方渠道，稳定 | ⚠️ 同 twitter-cli 早期，除非上 Sweetistics |
 | 读 Timeline | ✅ `twitter feed` | ❌ 不支持 | ✅ `bird home` |
 | 读单条推+回复 | ✅ `twitter tweet <URL>` | ✅ 搜索+自动总结 | ✅ `bird read` / `bird thread` |
 | Thread 全貌 | ⚠️ 单条+回复 | 搜索返回 | ✅ `bird thread`（完整会话链） |
@@ -115,8 +115,8 @@ x_search 费用 = Token 费 + 工具调用费
 
 ## 注意
 
-- twitter-cli 的 `search` 命令频繁因 Twitter GraphQL 改动返回 404，不是本地配置问题
-- bird-cli 的 `search` 同样走 GraphQL，稳定性一致，Sweetistics 通道可绕过但需额外付费
+- ~~twitter-cli 的 `search` 命令频繁因 Twitter GraphQL 改动返回 404~~ → **已闭环修复**：POST 补丁（`scripts/patch_twitter_search_post.py`，幂等可重跑），2026-10-02 复测 search RC=0。升级 twitter-cli 后需重跑补丁
+- bird-cli 的 `search` 同样走 GraphQL，稳定性看齐打补丁后的 twitter-cli；Sweetistics 通道可绕过但需额外付费
 - `x_search` 需要显式配置 xAI 凭据到 Hermes 才能使用
 - 三种方式可以互补：免费抓取 + 付费搜索总结
 - bird-cli Windows 下需 `pnpm install && pnpm run build` 编译一次，macOS 才有自动 cookie 提取

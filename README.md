@@ -26,7 +26,9 @@
 | **豆瓣电影** | Rexxar API | 电影详情、影评、短评深度抓取 | 免登录 |
 | **多平台音视频转录** | `transcribe.py` (Whisper / yt-dlp) | 支持 YouTube、B站、小红书视频、小宇宙播客转文字稿 | 需 Groq API Key |
 | **GitHub / 开发** | `gh` CLI | 代码库检索、Issue/PR 联动 | 需 GitHub Auth |
-| **网页全文阅读** | Jina / Firecrawl / better-webfetch | 通用正文提取与降噪 | 视选型而定 |
+| **维基百科 / Wikidata** | `s_wikipedia.py` + `s_wikidata.py` | 词条全文、中英互转、Q编号结构化事实消歧 | 免登录 / 零凭证 |
+| **Quora** | `s_quora.py` | 问答搜索、高赞回答解析、话题追踪 | 需 Firecrawl API Key |
+| **网页全文阅读** | Jina / Firecrawl / `s_wechat_article.py` | 通用正文提取、微信直链反反爬深度清洗 | 视选型而定 |
 
 ## 💡 与原版（Panniantong/Agent-Reach）的区别与改进
 

@@ -1,50 +1,25 @@
-# 多平台视频转录与字幕 (Video & Audio Transcription)
+# 视频转录（B站 / YouTube / 小红书 / 小宇宙播客）
 
-> **支持平台矩阵**：
-> 1. **YouTube**：免登录原生/自动多语言字幕下载 (`yt-dlp`)、视频信息解析、无字幕音轨提取转写
-> 2. **B站 (Bilibili)**：`bilibili-cli` 原生直连提取官方字幕/AI总结，或兜底下载音频转写
-> 3. **小红书 (XiaoHongShu)**：短视频与图文笔记内嵌 SRT 字幕自动提取、音轨拉取转录
-> 4. **小宇宙播客 (Xiaoyuzhou)**：单集播客音频抓取与超长语音切片转文字稿
-> 5. **通用音视频**：本地文件或任意支持格式音频，通过云端 Groq Whisper Large-v3 秒级转文字
+覆盖四个视频/播客平台的字幕和转录：**YouTube、B站（Bilibili）、小红书视频笔记、小宇宙播客**。通用 URL 也可用 transcribe.py 自动识别。
 
-## 安装与环境依赖
+## YouTube (yt-dlp)
 
-```bash
-# 1. 媒体下载器 yt-dlp (各平台视频拉取核心)
-# Windows 推荐 winget 或 pip:
-pip install yt-dlp
-
-# 2. 系统核心依赖 ffmpeg (音视频格式转换与切片必备)
-# 必须配置在系统 PATH 环境变量中
-
-# 3. 云端 Whisper API (高速转文字)
-# 在 profile .env 中配置 GROQ_API_KEY=gsk_xxxx (免费层已足够高频使用)
-```
-
-## 1. 统一转录入口脚本 (transcribe.py)
-
-无需关心底层各平台的取流差异，直接传 URL 或 ID 即可：
-
-```bash
-# 语法: python scripts/transcribe.py "<URL或ID>" [可选指定输出目录]
-
-# YouTube 视频
-python scripts/transcribe.py "https://www.youtube.com/watch?v=VIDEO_ID"
-
-# B站视频 (支持 URL 或 BV 号)
-python scripts/transcribe.py "https://www.bilibili.com/video/BV19xwKeTEye"
-python scripts/transcribe.py "BV19xwKeTEye"
-
-# 小红书视频笔记 (支持 URL 或 24位 hex note_id)
-python scripts/transcribe.py "https://www.xiaohongshu.com/explore/699da865000000000e03ca2b"
-
-# 小宇宙播客
-python scripts/transcribe.py "https://www.xiaoyuzhoufm.com/episode/EPISODE_ID"
-```
-
----
-
-## 2. YouTube (yt-dlp 详细命令)
+> ### ⚠️ 本机当前状态：不可用（2026-09-18 实测）
+>
+> ### ✅ 本机当前状态：可用（2026-10-02 实测恢复）
+>
+> `yt-dlp -F "https://www.youtube.com/watch?v=..."` RC=0，全部格式可列出（含 4K），
+> 无 "Sign in to confirm you're not a bot" / LOGIN_REQUIRED 报错。走 visionos player API + node 解 JS challenge。
+> 可能原因：代理出口节点更换、yt-dlp 2026.08.19 的 visionos client 生效、或 YouTube 侧策略变化。
+>
+> **历史记录（2026-09-18 曾全灭，供回退参考）**：当时出口 `64.110.82.17` 属 Oracle Cloud 首尔机房
+> （ASN 31898），数据中心 IP 被 YouTube 判定为机器人，强制要求登录。已实测排除：换 `player_client`
+> （tv / web_safari / mweb / ios / android / web_embedded / tv_simply，7/7 全败）、网络不通（web 页面
+> HTTP 200、oEmbed 正常）。**若再次出现 LOGIN_REQUIRED，可参考当时的解法**：换非数据中心出口节点，
+> 或配置 PO Token provider（`bgutil-ytdlp-pot-provider`，官方推荐，配 `mweb` client）。
+> 见 [PO Token Guide](https://github.com/yt-dlp/yt-dlp/wiki/PO-Token-Guide)。
+>
+> ⚠️ 本次仅验证了格式侦察（-F），**真实下载尚未实测**，首次下载长视频前建议先 `-F` 确认。
 
 ### 获取视频元数据
 
@@ -88,12 +63,55 @@ python <skill-path>/scripts/transcribe.py "URL" [输出目录]
 
 ## B站 / Bilibili
 
-使用 `bili` 命令（bilibili-cli），优先于 yt-dlp。
+`bili`（bilibili-cli）用于**元数据/字幕/评论**；**下载视频文件用 yt-dlp**。
+
+### ⭐ 下载视频 / 音频（2026-09-18 实测通过）
+
+```bash
+# 视频（自动选最佳画质+音轨并合并为 mp4）
+yt-dlp -f "bv*+ba/b" --merge-output-format mp4 "https://www.bilibili.com/video/BVxxx"
+
+# 只下音频
+yt-dlp -f "ba/b" -x --audio-format m4a "URL"
+
+# 只看能下什么、不下（先侦察）
+yt-dlp -F "URL"
+
+# 字幕（不下视频）
+yt-dlp --write-sub --write-auto-sub --sub-lang "zh-Hans,zh,en" --convert-subs srt --skip-download "URL"
+```
+
+**实测数据**（BV1uv411q7Mv，未登录态）：1920x1080 hevc + aac，77.60 MB，时长校验 313.3865s ✅。
+**未登录也能拿到 1080P**，不必先登录。
+
+### ⚠️ 版本红线：yt-dlp 必须 ≥ 2026.07.04
+
+| 版本 | B站 表现 |
+|---|---|
+| < 2026.07.04（如 2026.03.17） | ❌ 恒 `HTTP Error 412 Precondition Failed`，无法下载 |
+| ≥ 2026.07.04（如 2026.08.19） | ✅ 正常，3/3 实测通过 |
+
+**根因**（2026-09-18 定位）：旧版 yt-dlp 调用 `x/player/wbi/playurl` 时用 `bvid=` 传参，B站 对该参数形态恒定返回 412；
+改用 `avid=` 则正常。官方已在 **2026.07.04** 发布 `bilibili: Fix API extraction`
+（[issue #13730](https://github.com/yt-dlp/yt-dlp/issues/13730)，commit `e8de28e2`）修复。
+
+> **排查陷阱**：这个 412 与代理、Cookie、UA、Referer、fnval、wbi 签名、限流**全都无关** —— 以上变量均已逐一实测排除
+> （含对同接口连发 40 次全 200）。见到 412 先查版本，别去折腾代理和请求头。
+
+```bash
+# 升级（PyInstaller onedir 版自带自更新）
+yt-dlp -U
+yt-dlp --version   # 确认 ≥ 2026.07.04
+```
+
+### 🚫 不要用 `bili audio`
+
+`bili audio` 子命令会取到流地址并开始下载，但**卡死无产物**（2026-09-18 在 v0.6.2 复测：
+300s 超时强杀，只落 3881 字节半成品）。**下载一律走 yt-dlp。**
 
 ### 视频元数据
 
 ```bash
-# 视频详情（含统计、时长、UP主等）
 bili video BV19xwKeTEye
 bili video BV19xwKeTEye --yaml          # 结构化输出
 ```
@@ -122,18 +140,6 @@ bili video BV19xwKeTEye --ai            # B站 AI 总结
 ```bash
 python <skill-path>/scripts/transcribe.py "https://www.bilibili.com/video/BVxxx" [输出目录]
 ```
-
-### 备选：yt-dlp（当 bili-cli 不可用时）
-
-```bash
-# 元数据
-yt-dlp --dump-json "https://www.bilibili.com/video/BVxxx"
-
-# 字幕
-yt-dlp --write-sub --write-auto-sub --sub-lang "zh-Hans,zh,en" --convert-subs vtt --skip-download -o "/tmp/%(id)s" "URL"
-```
-
-> **注意**: yt-dlp 直连 B站 API 可能遇到 412 反爬拦截（当前环境已验证）。优先使用 bilibili-cli。
 
 ## 小红书 / XiaoHongShu (xhs CLI + 内嵌字幕)
 
@@ -170,16 +176,29 @@ python <skill-path>/scripts/transcribe.py "https://www.xiaoyuzhoufm.com/episode/
 
 ### 前置要求
 
-1. **ffmpeg**: 需在 PATH 中
+1. **ffmpeg**: 需在 PATH 中（本机在 `C:\Green Software\yt-dlp\ffmpeg.exe`）
 2. **Groq API Key**: 已配置在 Hermes `.env` 的 `GROQ_API_KEY`
-3. **yt-dlp**: 需已安装
+3. **yt-dlp**: 需已安装，且 **≥ 2026.07.04**（见 B站 章节的版本红线）
 
 ## 选择指南
 
 | 场景 | 推荐工具 |
 |-----|---------|
-| YouTube 字幕 | yt-dlp |
-| B站视频元数据/字幕 | bilibili-cli（首选） / yt-dlp（备选） |
+| **B站 下载视频/音频** | **yt-dlp**（必须 ≥ 2026.07.04） |
+| YouTube 下载 / 字幕 | yt-dlp — ✅ **2026-10-02 实测恢复可用**（格式侦察 RC=0 含 4K；真实下载建议先 `-F` 确认，历史拦截记录见上方） |
+| B站视频元数据/字幕/评论 | bilibili-cli |
 | 小红书字幕 | transcribe.py（xhs read + 内嵌SRT） |
 | 播客转录 | transcribe.py |
 | 无字幕音视频 | transcribe.py（Groq Whisper 兜底） |
+
+## 本机工具路径与版本（2026-09-18）
+
+| 工具 | 路径 | 说明 |
+|---|---|---|
+| yt-dlp | `C:\Green Software\yt-dlp\yt-dlp.exe` | PyInstaller onedir，`yt-dlp -U` 自更新 |
+| ffmpeg / ffprobe | `C:\Green Software\yt-dlp\` | 外置独立文件，**升级 yt-dlp 不会动它们** |
+| bili (bilibili-cli) | `bili` | v0.6.2，凭证见 bilibili.md |
+
+> **升级 yt-dlp 的坑**：`C:\Green Software\yt-dlp\` 里同时放着 ffmpeg 三件套（共约 280MB）。
+> 用 `yt-dlp -U` 升级是安全的（只替换 yt-dlp 本体 + `_internal/`），
+> **不要**手动整目录覆盖。升级前建议先备份 `yt-dlp.exe` + `_internal/`（约 21MB）。

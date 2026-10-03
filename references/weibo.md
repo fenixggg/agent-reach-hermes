@@ -21,21 +21,38 @@ weibo status                      # 验证
 
 | 位置 | 说明 |
 |---|---|
-| `~/.config/weibo-cli/credential.json`（即 `~/.config/weibo-cli/`） | **CLI 实际读取的**，`{"cookies": {"SUB","SUBP"}, "saved_at"}` |
-| profile `.env` | 无条目（SUB cookie 无内嵌过期，服务器端实际有效期通常 30 天以上；CLI 内置的 7 天 TTL 只是"建议刷新间隔"，过期后 API 仍可用则继续用）。如需备份可加 `WEIBO_SUB` |
+| `~/.config/weibo-cli/credential.json`（即 `~/.config/weibo-cli\`） | **CLI 实际读取的**，`{"cookies": {"SUB","SUBP"}, "saved_at"}` |
+| profile `.env` | `WEIBO_CREDENTIAL_PATH=%USERPROFILE%\.config\weibo-cli\credential.json`（**仅记录文件路径，不放 cookie 值**） |
 
 ## 能力矩阵（实测）
 
+> 🚨 **2026-09-25 事件 → 09-26 方案A修复 → 2026-10-02 再次失效（当前状态）**
+> 9 月下旬 s.weibo.com 搜索页（及 m.weibo.cn、weibo.com HTML 层）被 wbBotDetector 机器人检测壳拦截，
+> 症状为 `s_weibo_search.py` 静默返回 0 条。纯 HTTP 路线 9 轮探测确认全灭（游客握手/cookie 预热/
+> headless 无登录/Firecrawl 数据中心 IP），仅 hot_band 热搜 AJAX 存活。
+> **方案A（2026-09-26 上线，现已失效）**：专用 Edge profile `~\.wb-auto-profile`（需登录微博一次，SUB 30天+ 有效）+
+> headless `--dump-dom` 渲染 → 解析复用。**放行条件 = 真浏览器指纹 + 登录态，两者缺一不可**（实测矩阵定案）。
+> ⚠️ **2026-10-02 实测：方案A 不再生效**——edge 引擎 `EDGE_TIMEOUT`（headless dump 超时），回落 http 仍被
+> wbBotDetector 拦。关键词搜索暂不可用，兜底 `weibo hot` + Tavily(site:weibo.com)。待排查：profile 登录态
+> 过期（弹窗重登一次）或该 profile 的 Edge 窗口被占用（锁冲突）。
+> ⚠️ Edge 启动参数必须带 `--disable-extensions --disable-sync`（账号扩展同步拖垮 dump-dom，实测恒 0 字节）。
+> ⚠️ 该 profile 被占用（开着窗口）时 headless 失败——脚本已含残留进程清理+自动重试。
+> 登录态失效报 `EDGE_NOT_LOGGED_IN`，修复：弹出该 profile 窗口重新登录微博。
+> **ego-lite 备注**：同类产品化方案（Mac 独占，Windows 排队中），待其 Windows 版发布可重测替代本方案。
+
 | 功能 | 工具 | 状态 |
 |---|---|---|
-| 热搜榜 | `weibo hot --count 10` | ✅ 免登录也可用 |
-| 关键词搜索 | **`s_weibo_search.py`** | ✅ 实测 22 条真实结果 |
-| 微博详情 | `weibo detail <mid>` | ✅ 完整正文+统计 |
-| 评论 | `weibo comments <mid> --count 10` | ✅ |
-| 转发 | `weibo reposts <mid>` | ✅ |
-| 用户资料/微博列表/关注/粉丝 | `weibo profile/posts/... <uid>` | ✅ |
-| 热门时间线 | `weibo feed` | ✅ |
-| 关注者时间线 | `weibo home` | 需登录（已配置） |
+| 热搜榜 | `weibo hot --count 10` | ✅ 免登录也可用（hot_band AJAX 未被拦） |
+| 关键词搜索 | **`s_weibo_search.py`**（默认 auto 引擎） | ❌ **2026-10-02 实测再失效**——edge 引擎 `EDGE_TIMEOUT`（headless dump 超时），auto 回落 http 仍被 wbBotDetector 拦。09-26 修复方案当前不再生效，待排查 `~/.wb-auto-profile` 登录态/Edge 占用后重测。兜底：`weibo hot` + Tavily(site:weibo.com) |
+| 搜索联想词 | `side/search` AJAX | ✅ 仍可用 |
+| 热搜词出链接 | `--resolve-hot` | ✅ 已恢复（score 互动数抓取不完整是小瑕疵） |
+| 微博详情 | `weibo detail <mid>` | ❌ show 接口 ok=-100（bot 壳连带）——帖子正文可从搜索结果 text 字段获取 |
+| 评论 | `weibo comments <mid> --count 10` | ❌ 同上 |
+| 转发 | `weibo reposts <mid>` | ❌ 同上 |
+| 用户资料/微博列表/关注/粉丝 | `weibo profile/posts/... <uid>` | ❌ 同上 |
+| 热门时间线 | `weibo feed` | ❌ 同上 |
+| 关注者时间线 | `weibo home` | ❌ 同上 |
+| 链接修补 | `--fix-links` | ❌ 依赖 show 接口，仍不可用（明确报错） |
 
 ## 命令速查
 
@@ -44,16 +61,20 @@ weibo status                      # 验证
 weibo hot --count 10
 # 热搜词 → 对应帖子链接（按互动数取最优帖）【热搜出链接的唯一正确方式】
 python <skill-path>/scripts/s_weibo_search.py --resolve-hot "热搜词"
-# 关键词搜索（⚠️ 不用 weibo search，其移动API与SUB cookie不兼容返回ok=-100）
+# 关键词搜索（2026-09-26 起: 默认 auto 引擎 = headless Edge + 已登录 profile, 纯HTTP已被bot壳封锁）
+# ⚠️ 运行时要求: ~/.wb-auto-profile 已登录微博; 该 profile 的 Edge 窗口未开着(锁冲突)
+# ⚠️ 登录态失效时报 EDGE_NOT_LOGGED_IN: 弹出该 profile 窗口重新登录:
+#    Start-Process "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" -ArgumentList "--user-data-dir=$env:USERPROFILE\.wb-auto-profile","https://weibo.com"
+# 强制指定引擎: --engine edge | --engine http
 python <skill-path>/scripts/s_weibo_search.py "关键词" 1
 # 读单条微博全文（mid 从搜索结果的 url 或 hot 里拿）
 weibo detail <mid> --json
 # 评论 / 转发
 weibo comments <mid> --count 10
 weibo reposts <mid> --count 5
-# 用户
+# 用户（⚠️ 实际子命令名是 weibos，不是 posts）
 weibo profile <uid> --json
-weibo posts <uid> --count 10
+weibos <uid> --count 10
 # 热门时间线
 weibo feed --count 10
 ```
@@ -155,6 +176,43 @@ python <skill-path>/scripts/s_weibo_search.py --fix-links "<mid1>,<mid2>,..."
 | L3 指向 | **是否是该议题的帖子** | `GET https://weibo.com/ajax/statuses/show?id=<mblogid>` → 核对 `user.idstr` + `text_raw` | **唯一可信的校验** |
 
 **推荐做法（最省事且最稳）：热点话题类报告直接用话题聚合页 `s.weibo.com/weibo?q=<词>` 作主链接**，绕开整个 uid/mblogid 配对问题——实测返回 300KB+ 真实卡片，无登录墙，且比单帖更全面（用户偏好也是这个）。只有"引用某个博主的具体观点"时才用单帖双段链接，且**必须跑 L3 反查核对**。
+
+### ⚠️ 检测工具本身必须先带凭证（否则拿到假阴性，2026-09-12 第五次踩坑）
+
+**症状**：用裸 `curl` / Python `urllib` 批量验证报告里的微博链接，全部返回
+`Redirecting to https://passport.weibo.com/visitor/visitor?...` → 脚本判为 `FAIL`，
+看起来"14 条链接全坏"。
+
+**其实链接全是好的**——是**检测方法本身**没带 cookie。微博对无凭证请求一律踢到
+passport 访客页，这是反爬，不是链接失效。
+
+| 检测方式 | 结果 | 可用？ |
+|---|---|---|
+| 裸 `curl` / `urllib` 请求双段 URL | 302 → passport.weibo.com | ❌ 假阴性 |
+| 裸 `curl` 请求 `ajax/statuses/show` | 同上 | ❌ 假阴性 |
+| 加手机 UA 但无 cookie | 同上 | ❌ 假阴性 |
+| **`weibo detail <mid> --json`（CLI 自带 cookie）** | 返回 `user.idstr` / `mblogid` / `screen_name` / `text_raw` | ✅ **唯一可信** |
+
+**正确的批量核验姿势（四重交叉，2026-09-12 实测 14/14 通过）**：
+
+```powershell
+# 逐条跑，把返回值与报告里写的作者/正文/链接对账
+weibo detail <mid> --json
+# 从 JSON 里取四项，逐项比对：
+#   ① user.idstr   == 链接斜杠后第一段（UID 匹配）
+#   ② mblogid      == 链接斜杠后第二段（slug 匹配）
+#   ③ screen_name  == 报告署名（作者匹配）
+#   ④ text_raw     == 报告引用的原句（正文比对）
+Start-Sleep -Milliseconds 500   # 节流，14 条约 10 秒跑完
+```
+
+四项全中才算通过。**只查 HTTP 状态码是没有意义的**——passport 跳转也是 200/302，
+格式正则在离线文本上更是必然通过。
+
+> **通用教训（跨平台适用）**：验证抓取结果时，**验证脚本必须复用抓取时的同一条凭证链路**。
+> 用降级的、无凭证的方式去"复检"，只会得到一个看起来更严重、实则完全虚构的故障结论。
+> 知乎同理：直连 403，但 Firecrawl 实读正常——403 是 WAF，不是死链。
+
 
 **双段链接的错误风险高发场景**：跨报告批量修链接（多个会话/多份报告并行时，URL 极易串）。本会话四份报告（财经 Top5 / AI Top3 / 国际 Top3 / 国外AI Top3）就是教训。
 
